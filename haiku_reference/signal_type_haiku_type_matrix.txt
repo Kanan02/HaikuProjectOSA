@@ -1,0 +1,2 @@
+2:japanese
+3:western
