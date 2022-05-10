@@ -116,8 +116,7 @@ void write_haiku(int category) {
     fptr = fopen(categories[category-1], "r");
     if (fptr == NULL) {printf("Error reading file\n"); exit(1);}
     while (ch != EOF) {
-        ch = fgetc(fptr);
-        printf("%c",ch);
+        ch = fgetc(fptr);  
         file_con[i]=ch;
         i++;
     }
@@ -136,12 +135,10 @@ void signal_handler(int sig)
         
     }
     else if (sig==SIGINT)
-    {
-        printf("Hi");
+    { 
         write_haiku(1);
     }
     else if(sig==SIGQUIT){
-        printf("Hi2");
         write_haiku(2);
     }
 }
