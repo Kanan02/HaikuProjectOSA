@@ -52,11 +52,16 @@ void remove_queue ( int id ) {
         printf (" msgctl ") ;}
 }
 
-void write_value_msg_queue (int id , char* val) {
+int write_value_msg_queue (int id , char* val) {
     struct message m ; int r ;
     m.mtype = 25;
     strcpy(m.val, val);
     r = msgsnd (id , &m, sizeof m - sizeof m.mtype , 0) ;
+    if (r!=-1)
+    {
+        return 0;
+    }
+    return -1;
 }
 
 char* read_value_msg_queue (int id, struct message* m) {
@@ -119,7 +124,7 @@ void write_haiku(int category) {
     }
     fclose(fptr);
 
-    write_value_msg_queue(queue_id, file_con);
+     write_value_msg_queue(queue_id, file_con);
 }
 
 

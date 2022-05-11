@@ -17,7 +17,6 @@ struct message {
     long mtype ;
     char val[4000];
 };
-int write_haiku(int category);
 int create_queue ( void ) ;
 int access_queue ( void );
 void remove_queue ( int id );
@@ -57,10 +56,7 @@ void testREAD_VALUE_MESSAGE_QUEUE(void){
     char* word=read_value_msg_queue(id,&m);
     CU_ASSERT_STRING_EQUAL(word,"Hello");
 }
-void testWRITE_HAIKU(void){
-    int r=write_haiku(1);
-    CU_ASSERT_NOT_EQUAL(r,-1);
-}
+
 int main()
 {
    CU_pSuite clientSuite = NULL,serverSuite=NULL;
@@ -74,8 +70,8 @@ int main()
       return CU_get_error();
    }
    if (NULL == CU_add_test(serverSuite, "test of write_value_message_queue()", testWRITE_VALUE_MESSAGE_QUEUE)
-      ||NULL == CU_add_test(serverSuite, "test of read_value_message_queue()", testREAD_VALUE_MESSAGE_QUEUE)
-      ||NULL == CU_add_test(serverSuite, "test of write_haiku()", testWRITE_HAIKU)
+      ||NULL == CU_add_test(clientSuite, "test of read_value_message_queue()", testREAD_VALUE_MESSAGE_QUEUE)
+
   )
    {
       CU_cleanup_registry();
@@ -134,29 +130,3 @@ char* read_value_msg_queue (int id, struct message* m) {
     }
     return m->val;
 }
-int write_haiku(int category) {
-     int queue_id = access_queue();
-
-    char file_con[3000];
-    char * categories[] = {"../../haiku_reference/japanese.txt","../../haiku_reference/western.txt"};
-    
-    FILE* fptr; char ch; int i = 0;
-    if (category == 1) {
-        puts("\tWriting japanese haikus");
-    } 
-    else if (category == 2) {
-        puts("\tWriting western haikus");
-    } 
-
-    fptr = fopen(categories[category-1], "r");
-    if (fptr == NULL) {printf("Error reading file\n"); exit(1);}
-    while (ch != EOF) {
-        ch = fgetc(fptr);
-        file_con[i]=ch;
-        i++;
-    }
-    fclose(fptr);
-
-    return write_value_msg_queue(queue_id, file_con);
-}
-
