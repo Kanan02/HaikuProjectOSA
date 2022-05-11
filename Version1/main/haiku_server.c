@@ -9,7 +9,7 @@
 #include <sys/wait.h>
 void signal_handler(int sig);
 char* get_haiku_type(int sig);
-
+void signal_handler(int sig);
 int main()
 {
 
@@ -83,5 +83,6 @@ char* get_haiku_type(int sig){
             return strtok(NULL, ":");
         }
     }
+    return "Error";
 }
 

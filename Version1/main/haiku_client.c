@@ -11,7 +11,6 @@ int sigrand()
     int n=rand()%2+2;
     return n;    
 }
-
 int main(int argc, char const *argv[])
 {
     srand(time(0));
