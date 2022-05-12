@@ -10,11 +10,6 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-int sigrand()
-{
-    int n=rand()%2+2;
-    return n;    
-}
 
 struct pid_message {
     long mtype ;
@@ -64,35 +59,8 @@ void signal_handler(int sig){
     {
         kill(getpid(),9);
     }
-    reader();
+
 }
-char* read_value_msg_queue (int id, struct message* m) {
-    int r;
-    r = msgrcv (id , m, sizeof *m - sizeof m->mtype, 25, 0) ;
-    if (r == -1){
-        printf (" msgrcv ") ;
-    }
-    return m->val;
-}
-
-void reader() {
-    printf("-----------------Reader start-----------------\n");
-    
-    int queue_id = access_queue('A');
-    struct message m;
-    char* val = read_value_msg_queue(queue_id, &m);
-    printf("\n");
-
-    int count = 0, i = 0;
-    while (count < 3) {
-        printf("%c", m.val[i]);
-        i++;
-        if (m.val[i] == '\n') count++;
-    }
-    printf("\n");
-}
-
-
 int main(int argc, char const *argv[])
 {
     int id_q = access_queue('F');

@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <pthread.h>
 struct pid_message {
     long mtype ;
     pid_t val;
@@ -24,26 +25,33 @@ int create_queue ( char q );
 void remove_queue ( int id );
 void write_pid_msg_queue (int id , pid_t val) ;
 
-
+void *writer (void * arg);
+void* reader(void* arg);
 int main()
 {
-    int id_q=create_queue('F');
-    int id_mq=create_queue('A');
-    write_pid_msg_queue(id_q,getpid());
+    int pid_mq_id=create_queue('F');
+   
+    write_pid_msg_queue(pid_mq_id,getpid());
     printf("Server is running!\nQueue has been created!\n");
-    struct sigaction s;
-    s.sa_handler = signal_handler;
-    s.sa_flags=0;
-    sigemptyset(&s.sa_mask);
-    s.sa_flags = SA_SIGINFO;
-    sigaction(SIGINT, &s, NULL); 
-    sigaction(SIGQUIT, &s, NULL); // add how many you want
-    sigaction(SIGTSTP, &s, NULL); // add how many you want
-    while (1){
-        
+
+    pthread_t reader_tid, writer_tid; int e;
+    if ((e = pthread_create(&reader_tid, NULL, reader, 0)) != 0) {
+        perror("Error creating reader thread");
     }
-    remove_queue(id_q);
-    remove_queue(id_mq);
+
+    if ((e = pthread_create(&writer_tid, NULL, writer, 0)) != 0) {
+        perror("Error creating writer thread");
+    }
+
+    void* r;
+    if ((e = pthread_join(writer_tid, &r)) != 0) {
+        printf("Error waiting thread");
+    }
+    if ((e = pthread_join(reader_tid, &r)) != 0) {
+        printf("Error waiting thread");
+    }
+    remove_queue(pid_mq_id);
+        
 }
 
 
@@ -103,7 +111,7 @@ void write_haiku(int category) {
    
     int queue_id = access_queue('A');
     char file_con[10000];
-    char * categories[] = {"../haiku_reference/japanese.txt","../haiku_reference/western.txt"};
+    char * categories[] = {"../../haiku_reference/japanese.txt","../../haiku_reference/western.txt"};
     
     FILE* fptr; char ch; int i = 0;
     if (category == 1) {
@@ -126,6 +134,54 @@ void write_haiku(int category) {
 }
 
 
+char* read_value_msg_queue (int id, struct message* m) {
+    int r;
+    r = msgrcv (id , m, sizeof *m - sizeof m->mtype, 25, 0) ;
+    if (r == -1){
+        printf (" msgrcv ") ;
+    }
+    return m->val;
+}
+
+void *writer (void * arg) {
+    int haiku_mq_id=create_queue('A');
+    printf("-----------------Writer start-----------------\n");
+
+    struct sigaction s;
+    s.sa_handler = signal_handler;
+    s.sa_flags=0;
+    sigemptyset(&s.sa_mask);
+    s.sa_flags = SA_SIGINFO;
+    sigaction(SIGINT, &s, NULL); 
+    sigaction(SIGQUIT, &s, NULL);
+    sigaction(SIGTSTP, &s, NULL); 
+    while (1){
+        
+    }
+    remove_queue(haiku_mq_id);
+
+}
+int queue_id=0;
+void signal_handler2(int sig);
+void* reader(void* arg) {
+    while (1)
+    {
+        queue_id = access_queue('A');
+        printf("-----------------Reader start-----------------\n");
+        struct message m;
+        char* val = read_value_msg_queue(queue_id, &m);
+        printf("\n");
+
+        int count = 0, i = 0;
+        while (count < 3) {
+            printf("%c", m.val[i]);
+            i++;
+            if (m.val[i] == '\n') count++;
+        }
+        printf("\n");
+
+    }
+}
 
 void signal_handler(int sig)
 {
@@ -137,6 +193,7 @@ void signal_handler(int sig)
     else if (sig==SIGINT)
     { 
         write_haiku(1);
+       
     }
     else if(sig==SIGQUIT){
         write_haiku(2);

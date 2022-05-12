@@ -105,7 +105,7 @@ void write_haiku(int category) {
      int queue_id = access_queue();
 
     char file_con[3000];
-    char * categories[] = {"../haiku_reference/japanese.txt","../haiku_reference/western.txt"};
+    char * categories[] = {"../../haiku_reference/japanese.txt","../../haiku_reference/western.txt"};
     
     FILE* fptr; char ch; int i = 0;
     if (category == 1) {
@@ -141,7 +141,6 @@ int main(int argc, char** argv) {
         perror("Error creating reader thread");
     }
 
-    // Starting writer thread
     if ((e = pthread_create(&writer_tid, NULL, writer, 0)) != 0) {
         perror("Error creating writer thread");
     }
